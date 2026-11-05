@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PoseFinder — A reference library for figure drawing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c232c;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --border: rgba(255,255,255,0.05);
+    --teal: #00ffcc;
+    --blue: #0088ff;
+    --glow: rgba(0,255,204,0.15);
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
+  }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    margin:0;
+    font-weight:500;
+    letter-spacing:-0.01em;
+  }
+
+  a{ color:inherit; }
+  img{ max-width:100%; display:block; }
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  :focus-visible{
+    outline:2px solid var(--teal);
+    outline-offset:3px;
+  }
+
+  /* --- NAV --- */
+  nav{
+    padding:28px 0;
+    border-bottom:1px solid var(--border);
+  }
+  nav .wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .wordmark{
+    font-family:'Fraunces', serif;
+    font-size:1.35rem;
+    font-weight:600;
+    text-decoration:none;
+    letter-spacing:-0.01em;
+  }
+  .wordmark span{ color:var(--teal); }
+  .nav-links{
+    display:flex;
+    align-items:center;
+    gap:32px;
+    font-size:0.95rem;
+  }
+  .nav-links a{
+    text-decoration:none;
+    color:var(--muted);
+    transition:color 0.2s ease;
+  }
+  .nav-links a:hover{ color:var(--text); }
+  .btn-primary{
+    display:inline-block;
+    padding:11px 22px;
+    border-radius:8px;
+    background:linear-gradient(135deg, var(--teal) 0%, var(--blue) 100%);
+    color:#000;
+    font-weight:600;
+    text-decoration:none;
+    font-size:0.92rem;
+    transition:transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  /* Higher-specificity override: .nav-links a alone (0,0,1,1) beat the
+     plain .btn-primary rule (0,0,1,0) and washed the text out to
+     var(--muted). This rule wins wherever .btn-primary is nested. */
+  a.btn-primary{
+    color:#000;
+  }
+  .btn-primary:hover{
+    transform:translateY(-1px);
+    box-shadow:0 10px 20px var(--glow);
+  }
+  .btn-ghost{
+    color:var(--text);
+    text-decoration:none;
+    font-size:0.95rem;
+    border-bottom:1px solid var(--border);
+    padding-bottom:2px;
+    transition:border-color 0.2s ease, color 0.2s ease;
+  }
+  .btn-ghost:hover{ border-color:var(--teal); }
+
+  /* --- HERO --- */
+  .hero{
+    padding:96px 0 104px;
+  }
+  .hero .wrap{
+    display:grid;
+    grid-template-columns:1.05fr 0.95fr;
+    gap:64px;
+    align-items:center;
+  }
+  .hero-copy h1{
+    font-size:clamp(2.4rem, 4.2vw, 3.6rem);
+    line-height:1.08;
+  }
+  .hero-copy p{
+    margin-top:22px;
+    max-width:44ch;
+    color:var(--muted);
+    font-size:1.08rem;
+    line-height:1.65;
+  }
+  .hero-actions{
+    margin-top:34px;
+    display:flex;
+    align-items:center;
+    gap:28px;
+    flex-wrap:wrap;
+  }
+  .hero-art{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px;
+    background:linear-gradient(145deg, var(--panel), var(--bg));
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:inset 0 0 20px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .hero-art svg{
+    position:relative;
+    width:100%;
+    max-width:300px;
+    filter:drop-shadow(0 20px 40px rgba(0,0,0,0.5));
+    animation:rise 1.1s ease-out both;
+  }
+  @keyframes rise{
+    from{ opacity:0; transform:translateY(18px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .hero-caption{
+    margin-top:14px;
+    text-align:center;
+    font-size:0.85rem;
+    color:var(--muted);
+    font-style:italic;
+    font-family:'Fraunces', serif;
+  }
+
+  /* --- SECTION HEADERS --- */
+  .section-head{
+    max-width:56ch;
+    margin-bottom:44px;
+  }
+  .section-head h2{
+    font-size:clamp(1.6rem, 2.6vw, 2.1rem);
+  }
+  .section-head p{
+    margin-top:14px;
+    color:var(--muted);
+    font-size:1.02rem;
+  }
+
+  section{ padding:88px 0; }
+  section + section{ border-top:1px solid var(--border); }
+
+  /* --- SHARED CARD TREATMENT (mirrors .sleek-card from the app) --- */
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+  }
+  .sleek-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:26px;
+    transition:all 0.3s cubic-bezier(0.25,0.8,0.25,1);
+  }
+  .sleek-card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 10px 20px var(--glow);
+    border-color:rgba(0,255,204,0.4);
+  }
+  a.sleek-card{
+    text-decoration:none;
+    display:block;
+    color:inherit;
+    cursor:pointer;
+  }
+
+  /* --- ART TIPS --- */
+  .tip-card .tip-index{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    color:var(--teal);
+    font-size:1rem;
+  }
+  .tip-card h3{
+    margin-top:12px;
+    font-size:1.1rem;
+    font-weight:500;
+  }
+  .tip-card p{
+    margin-top:10px;
+    color:var(--muted);
+    font-size:0.95rem;
+  }
+
+  /* --- ABOUT / TEAM --- */
+  .team-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:20px;
+  }
+  .member-card{
+    text-align:center;
+  }
+  .member-photo{
+    width:104px;
+    height:104px;
+    margin:0 auto 18px;
+    border-radius:50%;
+    border:2px solid var(--border);
+    background:var(--panel-2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .member-photo svg{ width:52%; opacity:0.55; }
+  .member-photo img{ width:100%; height:100%; object-fit:cover; }
+  .member-name{
+    font-size:1.05rem;
+    font-weight:500;
+  }
+  .member-role{
+    margin-top:4px;
+    font-size:0.85rem;
+    color:var(--teal);
+  }
+  .member-bio{
+    margin-top:12px;
+    font-size:0.9rem;
+    color:var(--muted);
+    line-height:1.55;
+  }
+
+  /* --- CLOSING CTA --- */
+  .closing{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:32px;
+    flex-wrap:wrap;
+  }
+  .closing h2{ font-size:clamp(1.7rem, 3vw, 2.3rem); max-width:20ch; }
+
+  /* --- FOOTER --- */
+  footer{
+    border-top:1px solid var(--border);
+    padding:40px 0;
+  }
+  footer .wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+    font-size:0.85rem;
+    color:var(--muted);
+  }
+  .foot-links-row{ display:flex; gap:24px; }
+  .foot-links-row a{ text-decoration:none; color:var(--muted); }
+  .foot-links-row a:hover{ color:var(--text); }
+
+  .hidden-channel {
+    display: none !important;
+  }
+  .show-more-wrap {
+    text-align: center;
+    margin-top: 40px;
+  }
+  button.btn-ghost {
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    font-family: inherit;
+    padding-bottom: 2px;
+  }
+  button.btn-ghost:hover {
+    border-color: var(--teal);
+  }
+
+  @media (max-width: 860px){
+    .hero .wrap{ grid-template-columns:1fr; gap:48px; }
+    .hero-art{ order:-1; }
+    .card-grid{ grid-template-columns:1fr; }
+    .team-grid{ grid-template-columns:repeat(2, 1fr); }
+    section{ padding:64px 0; }
+    .hero{ padding:64px 0 72px; }
+  }
+  @media (max-width: 520px){
+    .team-grid{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="/studio" class="wordmark">Pose<span>Finder</span></a>
+    <div class="nav-links">
+      <a href="#tips">Art Tips</a>
+      <a href="#resources">Resources</a>
+      <a href="PoseFinder User Manual.pdf" target="_blank" rel="noopener noreferrer">How it works</a>
+      <a href="#about">About</a>
+      <a href="/studio" class="btn-ghost">Sign in</a>
+      <a href="/studio" class="btn-primary">Open the studio</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-copy">
+      <h1>Set the pose.<br>We'll find the reference.</h1>
+      <p>PoseFinder turns a posable 3D mannequin into a search query. Build the gesture you're studying — a contrapposto stand, a foreshortened reach, a seated three-quarter turn — and it surfaces real photographs that hold the same pose, ranked by how close the fit actually is.</p>
+      <div class="hero-actions">
+        <a href="/studio" class="btn-primary">Open the studio</a>
+        <a href="PoseFinder User Manual.pdf" target="_blank" rel="noopener noreferrer" class="btn-ghost">See how it works</a>
+      </div>
+    </div>
+      <div class="hero-art">
+      <div id="hero-canvas-container" style="width: 100%; height: 450px; max-width: 450px; animation: rise 1.1s ease-out both;"></div>
+    </div>
+  </div>
+  <p class="hero-caption">The mannequin you'll actually pose inside the studio.</p>
+</header>
+
+<section id="tips">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Art tips</h2>
+      <p>A few habits worth building into every reference session, whether you're doing a 30-second gesture or a full study.</p>
+    </div>
+    <div class="card-grid">
+      <div class="sleek-card tip-card">
+        <span class="tip-index">Gesture first</span>
+        <h3>Draw the movement before the outline</h3>
+        <p>Find the line of action running through the spine before you touch a single contour. The gesture is what makes a pose feel alive — details can't rescue a stiff gesture.</p>
+      </div>
+      <div class="sleek-card tip-card">
+        <span class="tip-index">Timing</span>
+        <h3>Practice at more than one speed</h3>
+        <p>30-second poses build instinct; 10-minute poses build accuracy. Rotate between both instead of settling into one comfortable pace.</p>
+      </div>
+      <div class="sleek-card tip-card">
+        <span class="tip-index">Negative space</span>
+        <h3>Check the shapes around the figure, not just on it</h3>
+        <p>The space between an arm and the torso is often easier to get right than the arm itself — and it will tell you immediately if a proportion is off.</p>
+      </div>
+      <div class="sleek-card tip-card">
+        <span class="tip-index">Values</span>
+        <h3>Block in light and shadow before detail</h3>
+        <p>Squint at the reference and place two or three value shapes first. Detail added on top of correct values reads as form; detail added without it just reads as texture.</p>
+      </div>
+      <div class="sleek-card tip-card">
+        <span class="tip-index">Foreshortening</span>
+        <h3>Draw the near shape big and simple</h3>
+        <p>Whatever's closest to the viewer should dominate the silhouette. Resist the urge to shrink it just because it "looks too big" on the page.</p>
+      </div>
+      <div class="sleek-card tip-card">
+        <span class="tip-index">Review</span>
+        <h3>Flip your sketch to check it cold</h3>
+        <p>Mirroring a drawing (or just looking at it upside down) breaks your familiarity with it and makes proportion errors jump out immediately.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="resources">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Recommended channels</h2>
+      <p>Watching experienced artists break down their process is one of the fastest ways to improve. Here are essential YouTube channels for mastering anatomy, color, and perspective.</p>
+    </div>
+    <div class="card-grid" id="channels-grid">
+
+      <a href="https://www.youtube.com/@ProkoTV" target="_blank" rel="noopener noreferrer" class="sleek-card member-card">
+        <div class="member-photo">
+          <img src="Proko.jpg" alt="Proko" onerror="this.src='https://ui-avatars.com/api/?name=Proko&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">Proko</div>
+        <div class="member-role">Stan Prokopenko</div>
+        <p class="member-bio">Stan Prokopenko's comprehensive masterclass platform for structural human anatomy, dynamic gesture drawing, and portrait construction.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+      <a href="https://www.youtube.com/@marcobucci" target="_blank" rel="noopener noreferrer" class="sleek-card member-card">
+        <div class="member-photo">
+          <img src="Marco Bucci.jpg" alt="Marco Bucci" onerror="this.src='https://ui-avatars.com/api/?name=Marco+Bucci&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">Marco Bucci</div>
+        <div class="member-role">Marco Bucci</div>
+        <p class="member-bio">A phenomenal resource for digital and traditional painters. Marco focuses heavily on the "why" of art, diving deep into color theory, light, and brushwork using highly engaging storytelling.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+      <a href="https://www.youtube.com/@CircleLineArtSchool" target="_blank" rel="noopener noreferrer" class="sleek-card member-card">
+        <div class="member-photo">
+          <img src="Circle Line Art School.jpg" alt="Circle Line Art School" onerror="this.src='https://ui-avatars.com/api/?name=Circle+Line&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">Circle Line Art School</div>
+        <div class="member-role">Tom McPherson</div>
+        <p class="member-bio">Excellent for absolute beginners and artists looking to master perspective. Tom offers soothing, real-time narrated tutorials on architectural sketching, environmental perspective, and drawing fundamentals.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+      <a href="https://www.youtube.com/@YTartschool" target="_blank" rel="noopener noreferrer" class="sleek-card member-card hidden-channel">
+        <div class="member-photo">
+          <img src="marc.jpg" alt="Marc Brunet" onerror="this.src='https://ui-avatars.com/api/?name=Marc+Brunet&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">Marc Brunet</div>
+        <div class="member-role">Marc Brunet</div>
+        <p class="member-bio">Professional digital art tutorials breaking down body proportions, bone landmarks, muscle groups, and stylized character design.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+      <a href="https://www.youtube.com/@Sycra" target="_blank" rel="noopener noreferrer" class="sleek-card member-card hidden-channel">
+        <div class="member-photo">
+          <img src="Sycra.jpg" alt="Sycra" onerror="this.src='https://ui-avatars.com/api/?name=Sycra&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">Sycra</div>
+        <div class="member-role">Sycra Yasin</div>
+        <p class="member-bio">In-depth guides that simplify complex human anatomy, perspective, and foundational construction lines into digestible steps.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+      <a href="https://www.youtube.com/@NewMastersAcademyorgNMA" target="_blank" rel="noopener noreferrer" class="sleek-card member-card hidden-channel">
+        <div class="member-photo">
+          <img src="New Masters Academy.jpg" alt="New Masters Academy" onerror="this.src='https://ui-avatars.com/api/?name=New+Masters+Academy&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">New Masters Academy</div>
+        <div class="member-role">Master Instructors</div>
+        <p class="member-bio">High-level masterclasses and demonstrations from master traditional artists covering classical figure drawing and anatomy.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+      <a href="https://www.youtube.com/@DanBeardshaw" target="_blank" rel="noopener noreferrer" class="sleek-card member-card hidden-channel">
+        <div class="member-photo">
+          <img src="Dan Beardshaw.jpg" alt="Dan Beardshaw" onerror="this.src='https://ui-avatars.com/api/?name=Dan+Beardshaw&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">Dan Beardshaw</div>
+        <div class="member-role">Dan Beardshaw</div>
+        <p class="member-bio">Exceptional portrait and figure tutorials with a heavy emphasis on structural anatomy, facial features, and perspective.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+      <a href="https://www.youtube.com/@lovelifedrawing" target="_blank" rel="noopener noreferrer" class="sleek-card member-card hidden-channel">
+        <div class="member-photo">
+          <img src="Love Life Drawing.jpg" alt="Love Life Drawing" onerror="this.src='https://ui-avatars.com/api/?name=Love+Life+Drawing&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">Love Life Drawing</div>
+        <div class="member-role">Kenzo &amp; Mayko</div>
+        <p class="member-bio">Dedicated completely to figure drawing, gesture mechanics, and building confidence with the living human form.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+      <a href="https://www.youtube.com/@DavidFinchartist" target="_blank" rel="noopener noreferrer" class="sleek-card member-card hidden-channel">
+        <div class="member-photo">
+          <img src="David Finch.jpg" alt="David Finch" onerror="this.src='https://ui-avatars.com/api/?name=David+Finch&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">David Finch</div>
+        <div class="member-role">David Finch</div>
+        <p class="member-bio">Comic book artist focusing heavily on dynamic human anatomy, muscle exaggeration, and structural layout using the Loomis system.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+      <a href="https://www.youtube.com/@thedrawingdatabase8743" target="_blank" rel="noopener noreferrer" class="sleek-card member-card hidden-channel">
+        <div class="member-photo">
+          <img src="Drawing Database.jpg" alt="Drawing Database" onerror="this.src='https://ui-avatars.com/api/?name=Marc+Leone&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">Drawing Database</div>
+        <div class="member-role">Marc Leone</div>
+        <p class="member-bio">University-level lecture archives providing deep-dive anatomical studies of the human skeleton and muscle systems.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+      <a href="https://www.youtube.com/@EthanBecker70" target="_blank" rel="noopener noreferrer" class="sleek-card member-card hidden-channel">
+        <div class="member-photo">
+          <img src="Ethan Becker.jpg" alt="Ethan Becker" onerror="this.src='https://ui-avatars.com/api/?name=Ethan+Becker&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">Ethan Becker</div>
+        <div class="member-role">Ethan Becker</div>
+        <p class="member-bio">Entertaining yet highly technical industry breakdowns on how to construct dynamic human anatomy from imagination.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+      <a href="https://www.youtube.com/@tituslunter6498" target="_blank" rel="noopener noreferrer" class="sleek-card member-card hidden-channel">
+        <div class="member-photo">
+          <img src="Titus Lunter.jpg" alt="Titus Lunter" onerror="this.src='https://ui-avatars.com/api/?name=Titus+Lunter&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">Titus Lunter</div>
+        <div class="member-role">Titus Lunter</div>
+        <p class="member-bio">Environment and figure concept art demonstrations that incorporate structural body forms and weight distribution.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+      <a href="https://www.youtube.com/@KeshArt" target="_blank" rel="noopener noreferrer" class="sleek-card member-card hidden-channel">
+        <div class="member-photo">
+          <img src="KeshArt.jpg" alt="MITCHELL MOON" onerror="this.src='https://ui-avatars.com/api/?name=MITCHELL+MOON&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">KeshArt</div>
+        <div class="member-role">KeshArt</div>
+        <p class="member-bio">Step-by-step human body construction, gesture flow, and artistic anatomy tailored for manga and concept artists.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+      <a href="https://www.youtube.com/@moderndayjames" target="_blank" rel="noopener noreferrer" class="sleek-card member-card hidden-channel">
+        <div class="member-photo">
+          <img src="ModerndayJames.jpg" alt="ModerndayJames" onerror="this.src='https://ui-avatars.com/api/?name=ModerndayJames&background=1c232c&color=00ffcc&size=200'">
+        </div>
+        <div class="member-name">ModerndayJames</div>
+        <div class="member-role">James</div>
+        <p class="member-bio">Analytical and structural perspective-based tutorials on human anatomy, bone landmarks, and geometric simplification.</p>
+        <div class="member-role" style="margin-top: 12px; font-weight: 600;">Click to see more</div>
+      </a>
+
+    </div>
+    
+    <div class="show-more-wrap">
+      <button id="show-more-btn" class="btn-ghost">Show more channels</button>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Meet the PoseFinder team</h2>
+      <p>PoseFinder: A Web-Based 3D Pose-Based Human Reference Image Retrieval System is an undergraduate thesis project developed by four Bachelor of Science in Computer Science students specializing in Graphics and Visualization at Laguna State Polytechnic University – San Pablo City Campus. The team collaboratively works on system development, research, documentation, testing, and user interface refinement to develop an accessible and functional pose-reference tool.</p>
+    </div>
+    <div class="team-grid">
+
+      <div class="member-card">
+        <div class="member-photo">
+          <img src="Iris Murciela F. Yenko_0323-3531.jpg" alt="Iris Murciela F. Yenko">
+        </div>
+        <div class="member-name">Iris Murciela F. Yenko</div>
+        <div class="member-role">Lead Developer</div>
+        <p class="member-bio">Oversees the technical development of PoseFinder, including the implementation of its core features, 3D pose interaction, API integration, and system functionality. Also works on optimizing and refining the system based on testing results and research requirements.</p>
+      </div>
+
+      <div class="member-card">
+        <div class="member-photo">
+          <img src="Keeshia Mae S. Roño_0323-3544.png" alt="Keeshia Mae S. Roño">
+        </div>
+        <div class="member-name">Keeshia Mae S. Roño</div>
+        <div class="member-role">Research &amp; Documentation Lead</div>
+        <p class="member-bio">Leads the research and documentation aspects of PoseFinder, including the development of the thesis manuscript, research methodology, system documentation, and organization of testing and evaluation requirements. Also contributes to UI review and overall system refinement.</p>
+      </div>
+
+      <div class="member-card">
+        <div class="member-photo">
+          <img src="team/Raquel Dan Lou M.jpg" alt="Raquel Dan Lou M. Morales">
+        </div>
+        <div class="member-name">Raquel Dan Lou M. Morales</div>
+        <div class="member-role">System Tester &amp; UI/UX Contributor</div>
+        <p class="member-bio">Contributes to system testing and quality evaluation by identifying functional issues and areas for improvement. Also reviews the user interface and provides recommendations to make PoseFinder more consistent, intuitive, and formally presented.</p>
+      </div>
+
+      <div class="member-card">
+        <div class="member-photo">
+          <img src="Jannelle Miyuki D. Oshiro_0323-3548.jpg" alt="Jannelle Miyuki D. Oshiro">
+        </div>
+        <div class="member-name">Jannelle Miyuki D. Oshiro</div>
+        <div class="member-role">System Tester &amp; UI/UX Contributor</div>
+        <p class="member-bio">Assists in testing and evaluating PoseFinder's features while providing feedback on usability, interface design, and system presentation. Also contributes to troubleshooting and refinement of features throughout the development process.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap closing">
+    <h2>Your next study is one pose away.</h2>
+    <a href="/studio" class="btn-primary">Open the studio</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 PoseFinder. Reference photography sourced from Unsplash contributors.</span>
+    <div class="foot-links-row">
+      <a href="#tips">Art Tips</a>
+      <a href="#resources">Resources</a>
+      <a href="PoseFinder User Manual.pdf" target="_blank" rel="noopener noreferrer">How it works</a>
+      <a href="#about">About</a>
+      <a href="/studio">Sign in</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const showMoreBtn = document.getElementById('show-more-btn');
+    const hiddenChannels = document.querySelectorAll('.hidden-channel');
+
+    if (showMoreBtn) {
+      showMoreBtn.addEventListener('click', () => {
+        hiddenChannels.forEach(card => {
+          card.classList.remove('hidden-channel');
+          card.style.animation = 'rise 0.6s ease-out both';
+        });
+        showMoreBtn.parentElement.style.display = 'none'; 
+      });
+    }
+  });
+</script>
+<script type="importmap">
+  { 
+    "imports": { 
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js", 
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" 
+    } 
+  }
+</script>
+
+<script type="module">
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+  const container = document.getElementById('hero-canvas-container');
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+  camera.position.set(0, 0.9, 2.7); 
+  camera.lookAt(0, 0.9, 0); 
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  container.appendChild(renderer.domElement);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.7)); 
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.5); 
+  dirLight.position.set(2, 2, 2); 
+  scene.add(dirLight);
+
+  let avatar;
+  const loader = new GLTFLoader();
+  
+  loader.load('ybot.glb', (gltf) => {
+      avatar = gltf.scene;
+      avatar.position.y = 0; 
+      scene.add(avatar);
+      
+      avatar.traverse((child) => { 
+          if (child.isMesh) { 
+              child.material.metalness = 0.2; 
+              child.material.roughness = 0.5; 
+          }
+      });
+
+      const targetBoneNames = [
+          'mixamorigHips', 'mixamorigSpine', 'mixamorigSpine1', 'mixamorigSpine2', 'mixamorigHead', 
+          'mixamorigLeftArm', 'mixamorigLeftForeArm', 'mixamorigLeftHand',
+          'mixamorigRightArm', 'mixamorigRightForeArm', 'mixamorigRightHand',
+          'mixamorigLeftUpLeg', 'mixamorigLeftLeg', 'mixamorigLeftFoot',
+          'mixamorigRightUpLeg', 'mixamorigRightLeg', 'mixamorigRightFoot'
+      ];
+      const sphereGeo = new THREE.SphereGeometry(0.06, 16, 16);
+      const sphereMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc, transparent: true, opacity: 0.25, depthTest: false });
+      
+      targetBoneNames.forEach(name => {
+          const bone = avatar.getObjectByName(name);
+          if (bone) {
+              const h = new THREE.Mesh(sphereGeo, sphereMat.clone()); 
+              h.scale.set(100, 100, 100); 
+              bone.add(h);
+          }
+      });
+  });
+
+  function animate() { 
+      requestAnimationFrame(animate); 
+      if (avatar) {
+          avatar.rotation.y += 0.005; 
+      }
+      renderer.render(scene, camera); 
+  } 
+  animate();
+
+  window.addEventListener('resize', () => { 
+      if (container.clientWidth > 0) {
+          camera.aspect = container.clientWidth / container.clientHeight; 
+          camera.updateProjectionMatrix(); 
+          renderer.setSize(container.clientWidth, container.clientHeight); 
+      }
+  });
+</script>
+
+</body>
+</html>
